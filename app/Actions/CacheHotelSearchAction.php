@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\DTOs\HotelDTO;
 use App\DTOs\SearchParamsDTO;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -15,15 +16,19 @@ class CacheHotelSearchAction
         private readonly SearchHotelsAction $searchAction,
     ) {}
 
-    public function __invoke(SearchParamsDTO $params): Collection
+    public function __invoke(SearchParamsDTO $params)
     {
         $cacheKey = $params->cacheKey();
 
-        return Cache::remember($cacheKey, now()->addMinutes(5), function () use ($params, $cacheKey) {
+        $data = Cache::remember($cacheKey, now()->addMinutes(5), function () use ($params, $cacheKey) {
             $results = ($this->searchAction)($params);
             $this->trackCacheKey($cacheKey);
-            return $results;
+            // Map DTOs to arrays for safe serialization in Redis
+            return $results->map(fn (HotelDTO $hotel) => (array) $hotel)->values()->all();
         });
+
+        // Re-inflate into Collection of DTOs from array data
+        return collect($data)->map(fn (array $hotel) => new HotelDTO(...$hotel));
     }
 
     private function trackCacheKey(string $cacheKey): void

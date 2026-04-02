@@ -1,0 +1,17 @@
+.git
+.github
+.idea
+.vscode
+node_modules
+vendor
+storage/framework/cache/data/*
+storage/framework/sessions/*
+storage/framework/views/*
+storage/logs/*
+public/build
+public/storage
+.env
+Dockerfile
+docker-compose.yml
+phpunit.xml
+tests

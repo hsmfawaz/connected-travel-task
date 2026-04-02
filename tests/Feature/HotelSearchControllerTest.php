@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\CacheHotelSearchAction;
 use App\Actions\ProcessHotelResultsAction;
 use App\Actions\SearchHotelsAction;
 use App\DTOs\HotelDTO;
@@ -110,9 +111,9 @@ describe('Validation', function () {
     });
 
     it('accepts valid optional parameters', function () {
-        $mock = Mockery::mock(SearchHotelsAction::class);
+        $mock = Mockery::mock(CacheHotelSearchAction::class);
         $mock->shouldReceive('__invoke')->once()->andReturn(collect());
-        $this->app->instance(SearchHotelsAction::class, $mock);
+        $this->app->instance(CacheHotelSearchAction::class, $mock);
 
         $this->getJson('/api/hotels/search?' . http_build_query([
             ...$this->validParams,
@@ -128,11 +129,11 @@ describe('Validation', function () {
 describe('Successful response', function () {
 
     it('returns a 200 with data array', function () {
-        $mock = Mockery::mock(SearchHotelsAction::class);
+        $mock = Mockery::mock(CacheHotelSearchAction::class);
         $mock->shouldReceive('__invoke')->once()->andReturn(collect([
             new HotelDTO('Grand Nile Tower', 'Cairo, Egypt', 120.50, 8, 4.7, 'supplier_a'),
         ]));
-        $this->app->instance(SearchHotelsAction::class, $mock);
+        $this->app->instance(CacheHotelSearchAction::class, $mock);
 
         $this->getJson('/api/hotels/search?' . http_build_query($this->validParams))
             ->assertOk()
@@ -140,11 +141,11 @@ describe('Successful response', function () {
     });
 
     it('returns correct hotel fields in the response', function () {
-        $mock = Mockery::mock(SearchHotelsAction::class);
+        $mock = Mockery::mock(CacheHotelSearchAction::class);
         $mock->shouldReceive('__invoke')->once()->andReturn(collect([
             new HotelDTO('Grand Nile Tower', 'Cairo, Egypt', 120.50, 8, 4.7, 'supplier_a'),
         ]));
-        $this->app->instance(SearchHotelsAction::class, $mock);
+        $this->app->instance(CacheHotelSearchAction::class, $mock);
 
         $this->getJson('/api/hotels/search?' . http_build_query($this->validParams))
             ->assertOk()
@@ -159,9 +160,9 @@ describe('Successful response', function () {
     });
 
     it('returns an empty data array when no hotels match', function () {
-        $mock = Mockery::mock(SearchHotelsAction::class);
+        $mock = Mockery::mock(CacheHotelSearchAction::class);
         $mock->shouldReceive('__invoke')->once()->andReturn(collect());
-        $this->app->instance(SearchHotelsAction::class, $mock);
+        $this->app->instance(CacheHotelSearchAction::class, $mock);
 
         $this->getJson('/api/hotels/search?' . http_build_query($this->validParams))
             ->assertOk()
@@ -169,13 +170,13 @@ describe('Successful response', function () {
     });
 
     it('returns multiple hotels in the data array', function () {
-        $mock = Mockery::mock(SearchHotelsAction::class);
+        $mock = Mockery::mock(CacheHotelSearchAction::class);
         $mock->shouldReceive('__invoke')->once()->andReturn(collect([
             new HotelDTO('Grand Nile Tower', 'Cairo, Egypt', 120.50, 8, 4.7, 'supplier_a'),
             new HotelDTO('Cairo Citadel Suites', 'Cairo, Egypt', 88.00, 18, 3.6, 'supplier_b'),
             new HotelDTO('Pyramids View Hotel', 'Cairo, Egypt', 95.00, 15, 3.5, 'supplier_a'),
         ]));
-        $this->app->instance(SearchHotelsAction::class, $mock);
+        $this->app->instance(CacheHotelSearchAction::class, $mock);
 
         $this->getJson('/api/hotels/search?' . http_build_query($this->validParams))
             ->assertOk()
@@ -183,7 +184,7 @@ describe('Successful response', function () {
     });
 
     it('passes search params to the action correctly', function () {
-        $mock = Mockery::mock(SearchHotelsAction::class);
+        $mock = Mockery::mock(CacheHotelSearchAction::class);
         $mock->shouldReceive('__invoke')
             ->once()
             ->withArgs(function (SearchParamsDTO $params) {
@@ -194,7 +195,7 @@ describe('Successful response', function () {
                     && $params->sortBy === 'rating';
             })
             ->andReturn(collect());
-        $this->app->instance(SearchHotelsAction::class, $mock);
+        $this->app->instance(CacheHotelSearchAction::class, $mock);
 
         $this->getJson('/api/hotels/search?' . http_build_query([
             ...$this->validParams,

@@ -99,6 +99,10 @@ return [
             ],
         ],
 
+        'null' => [
+            'driver' => 'null',
+        ],
+
     ],
 
     /*

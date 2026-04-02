@@ -3,7 +3,6 @@
 namespace App\Actions;
 
 use App\DTOs\SearchParamsDTO;
-use App\Suppliers\Contracts\HotelFetchingStrategy;
 use App\Suppliers\SupplierAStrategy;
 use App\Suppliers\SupplierBStrategy;
 use App\Suppliers\SupplierCStrategy;
@@ -31,12 +30,13 @@ class SearchHotelsAction
             new SupplierDStrategy(),
         ]);
 
-        $results = Octane::concurrently(
-            $strategies->map(
-                fn (HotelFetchingStrategy $strategy) => fn () => $strategy->fetch($params)
-            )->toArray(),
-            3000,
-        );
+        $tasks = $strategies->map(function ($strategy) use ($params) {
+            return function () use ($strategy, $params) {
+                return $strategy->fetch($params);
+            };
+        })->all();
+
+        $results = Octane::concurrently($tasks, 3000);
 
         $hotels = collect($results)->flatten(1);
 
