@@ -4,24 +4,61 @@ A Laravel API that aggregates hotel listings from four external suppliers concur
 
 ## Setup Instructions
 
-**Prerequisites:** PHP 8.3+, Composer, Swoole extension.
+### Option 1: Docker (Recommended)
+The project is fully containerized with **Laravel Octane (Swoole)** and **Redis**.
 
 ```bash
-# Install the Swoole extension
-pecl install swoole
+# 1. Clone the repository and copy .env
+cp .env.example .env
 
-# Clone and install dependencies
+# 2. Build and start the containers
+# This will automatically run 'composer install' and start the Octane server
+docker compose up -d --build
+
+# 3. Follow the logs to see the server state
+docker compose logs -f
+```
+
+The API will be available at [http://localhost:8000](http://localhost:8000).
+
+### Option 2: Native Setup
+**Prerequisites:** PHP 8.3+, Composer, Swoole extension, Redis.
+
+```bash
+# Install dependencies
 composer install
 
-# Copy environment file
+# Setup environment
 cp .env.example .env
 php artisan key:generate
 
 # Start the Octane server with Swoole
-php artisan octane:start --server=swoole --port=8000
+php artisan octane:start --server=swoole --port=8000 --workers=6
 ```
 
-## API Endpoint
+## Running Tests
+
+You can run the full test suite (Pest) inside the Docker container:
+
+```bash
+# Run all tests
+docker compose exec app php artisan test
+
+# Run unit tests only (deduplication, filtering logic)
+docker compose exec app php artisan test --filter=ProcessHotelResultsActionTest
+
+# Run feature tests only (API validation and caching)
+docker compose exec app php artisan test --filter=HotelSearchControllerTest
+```
+
+## Useful Commands
+
+| Action | Command |
+|---|---|
+| **Clear Cache** | `docker compose exec redis redis-cli flushall` |
+| **Restart App** | `docker compose restart app` |
+| **Check Workers** | `docker compose exec app php artisan octane:status` |
+| **View Logs** | `docker compose logs -f app` |
 
 ### `GET /api/hotels/search`
 
@@ -74,20 +111,8 @@ GET /api/hotels/search?location=Cairo&check_in=2025-09-01&check_out=2025-09-05&g
 }
 ```
 
-## Running Tests
 
-```bash
-# Run all tests
-php artisan test
-
-# Run unit tests only (merge, filter, deduplication)
-php artisan test --filter=ProcessHotelResultsActionTest
-
-# Run feature tests only (controller validation and response)
-php artisan test --filter=HotelSearchControllerTest
-```
-
-### Test Coverage
+## Test Coverage
 
 | Suite | File | Tests |
 |---|---|---|
